@@ -66,6 +66,7 @@ func Cors(option cors.CorsOptions) Middleware {
 				w.Header().Set("Access-Control-Allow-Methods", strings.Join(option.AllowMethods, ", "))
 			}
 
+			w.WriteHeader(http.StatusNoContent)
 		})
 	}
 }

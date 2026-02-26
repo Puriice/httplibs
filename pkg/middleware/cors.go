@@ -101,7 +101,8 @@ func Cors(option cors.CorsOptions) Middleware {
 				return
 			}
 
-			h.Add("Vary", "Access-Control-Request-Headers, Access-Control-Allow-Methods")
+			h.Add("Vary", "Access-Control-Request-Headers")
+			h.Add("Vary", "Access-Control-Allow-Methods")
 
 			if header := r.Header.Get("Access-Control-Request-Headers"); header != "" {
 				if len(option.AllowHeaders) > 0 {

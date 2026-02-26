@@ -1,3 +1,3 @@
-module github.com/Puriice/httplibs.git
+module github.com/Puriice/httplibs
 
 go 1.25.6

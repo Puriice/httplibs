@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/puriice/httplibs/internal/iterable"
 	"github.com/puriice/httplibs/pkg/middleware/cors"
 )
 
@@ -32,21 +33,21 @@ func Cors(option cors.CorsOptions) Middleware {
 		config.origins[o] = struct{}{}
 	}
 
-	// Precompute joined strings once
-	if len(option.AllowMethods) > 0 {
-		config.methods = strings.Join(option.AllowMethods, ", ")
+	if len(option.AllowMethods) == 0 {
+		option.AllowMethods = []string{http.MethodGet, http.MethodPost, http.MethodHead}
 	}
+	config.methods = strings.Join(iterable.Map(option.AllowMethods, http.CanonicalHeaderKey), ", ")
 
 	if len(option.AllowHeaders) > 0 {
-		config.headers = strings.Join(option.AllowHeaders, ", ")
+		config.headers = strings.Join(iterable.Map(option.AllowHeaders, http.CanonicalHeaderKey), ", ")
 	}
 
 	if len(option.AllowExposeHeaders) > 0 {
-		config.expose = strings.Join(option.AllowExposeHeaders, ", ")
+		config.expose = strings.Join(iterable.Map(option.AllowExposeHeaders, http.CanonicalHeaderKey), ", ")
 	}
 
 	if len(option.TimingAllowOrigin) > 0 {
-		config.time = strings.Join(option.TimingAllowOrigin, ", ")
+		config.time = strings.Join(iterable.Map(option.TimingAllowOrigin, http.CanonicalHeaderKey), ", ")
 	}
 
 	if option.MaxAge > 0 {
@@ -62,12 +63,11 @@ func Cors(option cors.CorsOptions) Middleware {
 
 			if origin == "" {
 				if option.AllowNoOrigin {
-					next.ServeHTTP(w, r)
+					origin = "*"
+				} else {
+					w.WriteHeader(http.StatusForbidden)
 					return
 				}
-
-				w.WriteHeader(http.StatusForbidden)
-				return
 			}
 
 			if !config.allowAll {
@@ -101,6 +101,8 @@ func Cors(option cors.CorsOptions) Middleware {
 				return
 			}
 
+			h.Add("Vary", "Access-Control-Request-Headers, Access-Control-Allow-Methods")
+
 			if header := r.Header.Get("Access-Control-Request-Headers"); header != "" {
 				if len(option.AllowHeaders) > 0 {
 					h.Set("Access-Control-Allow-Headers", config.headers)
@@ -109,11 +111,7 @@ func Cors(option cors.CorsOptions) Middleware {
 				}
 			}
 
-			if option.AllowMethods != nil {
-				h.Set("Access-Control-Allow-Methods", config.methods)
-			} else {
-				h.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			}
+			h.Set("Access-Control-Allow-Methods", config.methods)
 
 			w.WriteHeader(http.StatusNoContent)
 		})

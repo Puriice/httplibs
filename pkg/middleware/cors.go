@@ -77,7 +77,6 @@ func Cors(option cors.CorsOptions) Middleware {
 				}
 			}
 
-			h.Add("Vary", "Origin")
 			h.Set("Access-Control-Allow-Origin", origin)
 
 			if option.AllowCredentials {
@@ -97,11 +96,15 @@ func Cors(option cors.CorsOptions) Middleware {
 			}
 
 			if r.Method != http.MethodOptions {
+				if header, ok := h["Vary"]; ok {
+					h.Set("Vary", strings.Join(append(header, "Origin"), ", "))
+				}
+
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			h.Add("Vary", "Access-Control-Request-Headers, Access-Control-Allow-Methods")
+			h.Set("Vary", "Origin, Access-Control-Request-Headers, Access-Control-Allow-Methods")
 
 			if header := r.Header.Get("Access-Control-Request-Headers"); header != "" {
 				if len(option.AllowHeaders) > 0 {

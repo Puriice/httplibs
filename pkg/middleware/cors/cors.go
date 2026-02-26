@@ -23,6 +23,7 @@ type CorsOptions struct {
 
 func NewCorsOptions() *CorsOptions {
 	return &CorsOptions{
+		MaxAge:           -1,
 		AllowCredentials: false,
 		AllowNoOrigin:    false,
 	}

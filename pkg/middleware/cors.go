@@ -26,7 +26,7 @@ func Cors(option cors.CorsOptions) Middleware {
 				return
 			}
 
-			if !slices.Contains(option.AllowOrigins, origin) || &option.AllowOrigins[0] == &cors.Wildcard()[0] {
+			if !slices.Contains(option.AllowOrigins, origin) && !slices.Contains(option.AllowOrigins, "*") {
 				w.WriteHeader(http.StatusForbidden)
 				return
 			}
@@ -54,7 +54,7 @@ func Cors(option cors.CorsOptions) Middleware {
 				return
 			}
 
-			if header := r.Header.Get("Access-Control-Request-Header"); header != "" {
+			if header := r.Header.Get("Access-Control-Request-Headers"); header != "" {
 				if option.AllowHeaders != nil {
 					w.Header().Set("Access-Control-Allow-Headers", strings.Join(option.AllowHeaders, ", "))
 				} else {

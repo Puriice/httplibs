@@ -14,7 +14,7 @@ func Cors(option cors.CorsOptions) Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
 
-			origin := r.Header.Get("origin")
+			origin := r.Header.Get("Origin")
 
 			if origin == "" {
 				if option.AllowNoOrigin {
@@ -31,13 +31,14 @@ func Cors(option cors.CorsOptions) Middleware {
 				return
 			}
 
+			w.Header().Add("Vary", "Origin")
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 
 			if option.AllowCredentials {
 				w.Header().Set("Access-Control-Allow-Credentials", "true")
 			}
 
-			if option.AllowExposeHeaders != nil {
+			if len(option.AllowExposeHeaders) > 0 {
 				w.Header().Set("Access-Control-Expose-Headers", strings.Join(option.AllowExposeHeaders, ", "))
 			}
 
@@ -45,7 +46,7 @@ func Cors(option cors.CorsOptions) Middleware {
 				w.Header().Set("Access-Control-Max-Age", fmt.Sprint(option.MaxAge))
 			}
 
-			if option.TimingAllowOrigin != nil {
+			if len(option.TimingAllowOrigin) > 0 {
 				w.Header().Set("Timing-Allow-Origin", strings.Join(option.TimingAllowOrigin, ", "))
 			}
 
@@ -55,15 +56,17 @@ func Cors(option cors.CorsOptions) Middleware {
 			}
 
 			if header := r.Header.Get("Access-Control-Request-Headers"); header != "" {
-				if option.AllowHeaders != nil {
+				if len(option.AllowHeaders) > 0 {
 					w.Header().Set("Access-Control-Allow-Headers", strings.Join(option.AllowHeaders, ", "))
 				} else {
-					w.Header().Set("Access-Control-Allow-Headers", "*")
+					w.Header().Set("Access-Control-Allow-Headers", header)
 				}
 			}
 
 			if option.AllowMethods != nil {
 				w.Header().Set("Access-Control-Allow-Methods", strings.Join(option.AllowMethods, ", "))
+			} else {
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			}
 
 			w.WriteHeader(http.StatusNoContent)

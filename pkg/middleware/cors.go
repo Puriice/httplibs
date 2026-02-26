@@ -98,6 +98,8 @@ func Cors(option cors.CorsOptions) Middleware {
 			if r.Method != http.MethodOptions {
 				if header, ok := h["Vary"]; ok {
 					h.Set("Vary", strings.Join(append(header, "Origin"), ", "))
+				} else {
+					h.Set("Vary", "Origin")
 				}
 
 				next.ServeHTTP(w, r)

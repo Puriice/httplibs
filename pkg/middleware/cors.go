@@ -33,10 +33,9 @@ func Cors(option cors.CorsOptions) Middleware {
 		config.origins[o] = struct{}{}
 	}
 
-	if len(option.AllowMethods) == 0 {
-		option.AllowMethods = []string{http.MethodGet, http.MethodPost, http.MethodHead}
+	if len(option.AllowMethods) > 0 {
+		config.methods = strings.Join(iterable.Map(option.AllowMethods, http.CanonicalHeaderKey), ", ")
 	}
-	config.methods = strings.Join(iterable.Map(option.AllowMethods, http.CanonicalHeaderKey), ", ")
 
 	if len(option.AllowHeaders) > 0 {
 		config.headers = strings.Join(iterable.Map(option.AllowHeaders, http.CanonicalHeaderKey), ", ")
@@ -116,7 +115,13 @@ func Cors(option cors.CorsOptions) Middleware {
 				}
 			}
 
-			h.Set("Access-Control-Allow-Methods", config.methods)
+			if header := r.Header.Get("Access-Control-Request-Methods"); header != "" {
+				if len(option.AllowMethods) > 0 {
+					h.Set("Access-Control-Allow-Methods", config.methods)
+				} else {
+					h.Set("Access-Control-Allow-Methods", header)
+				}
+			}
 
 			w.WriteHeader(http.StatusNoContent)
 		})

@@ -1,10 +1,10 @@
-package pg_test
+package pgutils_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/puriice/httplibs/pkg/pg"
+	"github.com/puriice/httplibs/pkg/pgutils"
 )
 
 type user struct {
@@ -24,7 +24,7 @@ func TestFromOne(t *testing.T) {
 		Password: &password,
 	}
 
-	statement, argv, err := pg.CreateSetStatement(*user, 1)
+	statement, argv, err := pgutils.CreateSetStatement(*user, 1)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -55,7 +55,7 @@ func TestFromFive(t *testing.T) {
 		Password: &password,
 	}
 
-	statement, argv, err := pg.CreateSetStatement(*user, 5)
+	statement, argv, err := pgutils.CreateSetStatement(*user, 5)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -84,7 +84,7 @@ func TestMissingSomeFields(t *testing.T) {
 		Username: &username,
 	}
 
-	statement, argv, err := pg.CreateSetStatement(*user, 1)
+	statement, argv, err := pgutils.CreateSetStatement(*user, 1)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -113,7 +113,7 @@ func TestFromPointer(t *testing.T) {
 		Username: &username,
 	}
 
-	statement, argv, err := pg.CreateSetStatement(user, 1)
+	statement, argv, err := pgutils.CreateSetStatement(user, 1)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

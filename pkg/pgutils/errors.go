@@ -1,4 +1,4 @@
-package pg
+package pgutils
 
 import "errors"
 

@@ -34,6 +34,9 @@ func CheckError(err error, w http.ResponseWriter) error {
 		status = http.StatusInternalServerError
 	case errors.As(err, &pgErr):
 		switch pgErr.Code {
+		case "22P02":
+			status = http.StatusUnprocessableEntity
+			err = ErrInvalidType
 		case "23502":
 			status = http.StatusConflict
 			err = ErrNotNullViolation

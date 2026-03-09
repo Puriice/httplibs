@@ -1,0 +1,47 @@
+package messaging
+
+import amqp "github.com/rabbitmq/amqp091-go"
+
+type RabbitMQ struct {
+	*amqp.Connection
+	Channel  *amqp.Channel
+	Exchange string
+}
+
+func NewRabbitMQ(url string, exchange string) (*RabbitMQ, error) {
+	conn, err := amqp.Dial(url)
+	if err != nil {
+		return nil, err
+	}
+
+	ch, err := conn.Channel()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = ch.ExchangeDeclare(
+		exchange,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &RabbitMQ{
+		Connection: conn,
+		Channel:    ch,
+		Exchange:   exchange,
+	}, nil
+}
+
+func (r *RabbitMQ) Close() {
+	r.Channel.Close()
+	r.Close()
+}

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/puriice/httplibs/internal/iterable"
-	"github.com/puriice/httplibs/pkg/middleware/cors"
+	"github.com/puriice/golibs/internal/iterable"
+	"github.com/puriice/golibs/pkg/middleware/cors"
 )
 
 type config struct {

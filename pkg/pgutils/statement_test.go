@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/puriice/httplibs/pkg/pgutils"
+	"github.com/puriice/golibs/pkg/pgutils"
 )
 
 type user struct {

@@ -7,16 +7,16 @@ import (
 )
 
 type RabbitListener struct {
-	queue   *amqp.Queue
-	channel *amqp.Channel
+	queueName string
+	channel   *amqp.Channel
 }
 
 func (r *RabbitMQ) NewListener(queueName string, keys ...string) (*RabbitListener, error) {
 	q, err := r.Channel.QueueDeclare(
 		queueName,
-		false,
-		false,
 		true,
+		false,
+		false,
 		false,
 		nil,
 	)
@@ -40,16 +40,21 @@ func (r *RabbitMQ) NewListener(queueName string, keys ...string) (*RabbitListene
 	}
 
 	return &RabbitListener{
-		queue:   &q,
-		channel: r.Channel,
+		queueName: q.Name,
+		channel:   r.Channel,
 	}, nil
 }
 
 func (l *RabbitListener) Subscribe(handler func([]byte) error) error {
+	err := l.channel.Qos(10, 0, false)
+	if err != nil {
+		return err
+	}
+
 	msgs, err := l.channel.Consume(
-		l.queue.Name,
+		l.queueName,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
@@ -60,16 +65,17 @@ func (l *RabbitListener) Subscribe(handler func([]byte) error) error {
 		return err
 	}
 
-	go func() {
-		for data := range msgs {
-			err = handler(data.Body)
+	for msg := range msgs {
+		if err := handler(msg.Body); err != nil {
+			log.Println(err)
 
-			if err != nil {
-				log.Println(err)
-				continue
-			}
+			msg.Nack(false, true)
+
+			continue
 		}
-	}()
+
+		msg.Ack(true)
+	}
 
 	return nil
 }

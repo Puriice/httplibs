@@ -41,7 +41,7 @@ func NewRabbitMQ(url string, exchange string) (*RabbitMQ, error) {
 	}, nil
 }
 
-func (r *RabbitMQ) Close() {
+func (r *RabbitMQ) Shutdown() {
 	r.Channel.Close()
 	r.Close()
 }

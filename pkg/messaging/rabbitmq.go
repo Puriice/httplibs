@@ -38,7 +38,7 @@ func (r RabbitMQ) Shutdown() {
 func (r RabbitMQ) Broker(exchange string) (*RabbitBroker, error) {
 	err := r.Channel.ExchangeDeclare(
 		exchange,
-		"direct",
+		"topic",
 		true,
 		false,
 		false,
